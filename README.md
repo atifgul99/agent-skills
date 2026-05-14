@@ -1,6 +1,6 @@
 # Agent Skills
 
-Shared source of truth for AI agent skills. Both Cursor and Claude Code
+Shared source of truth for AI agent skills. Cursor, Claude Code, and Codex
 discover these via symlinks from their respective user-level skill directories.
 
 ## Directory Layout
@@ -35,6 +35,10 @@ discover these via symlinks from their respective user-level skill directories.
 ├── engineering-skills -> ~/.agent-skills/engineering-skills  # Shared (symlink)
 └── ...
 
+~/.codex/skills/                  # Codex user-level discovery
+├── engineering-skills -> ~/.agent-skills/engineering-skills  # Shared (symlink)
+└── ...
+
 <project>/skills/                 # Project-specific source of truth
 ├── quality-gate/
 ├── security-audit/
@@ -42,21 +46,37 @@ discover these via symlinks from their respective user-level skill directories.
 
 <project>/.cursor/skills/         # Symlinks to <project>/skills/
 <project>/.claude/skills/         # Symlinks to <project>/skills/
+<project>/.codex/skills/          # Symlinks to <project>/skills/
 ```
 
 ## Three Tiers
 
 **Shared (user-level)** — Skills useful across any project and any tool.
-Source of truth lives here in `~/.agent-skills/<name>/`. Each tool gets a
-symlink from its own user-level discovery path.
+Source of truth lives here in `~/.agent-skills/<name>/`. Symlinked into each
+tool's user-level discovery path (`~/.cursor/skills-cursor/`, `~/.claude/skills/`,
+`~/.codex/skills/`) — these are globally available across all projects.
 
 **Project-specific** — Skills tied to a single project's codebase or domain.
-Source of truth lives in `<project>/skills/`. Both `.cursor/skills/` and
-`.claude/skills/` symlink to `../../skills/<name>`.
+Source of truth lives in `<project>/skills/`. Symlinked only within the project
+into `<project>/.cursor/skills/`, `<project>/.claude/skills/`, and
+`<project>/.codex/skills/`. These never cross into user-level skill directories.
 
 **Tool-specific** — Skills that only make sense in one tool (e.g. Cursor's
-`create-rule`). Stay as real directories in their tool's user-level path —
-no symlinks needed.
+`create-rule`). Stay as real directories in their tool's user-level or project
+path — no symlinks needed.
+
+## Quick Setup
+
+To automatically create symlinks for all shared skills across all three tools:
+
+```bash
+~/.agent-skills/setup-symlinks.sh
+```
+
+This script:
+- Enumerates all skills in `~/.agent-skills/`
+- Creates symlinks in `~/.cursor/skills-cursor/`, `~/.claude/skills/`, and `~/.codex/skills/`
+- **Fails safely** if any symlink already exists (prevents overwrites)
 
 ## How To
 
@@ -69,18 +89,23 @@ cp -r /path/to/new-skill ~/.agent-skills/new-skill
 # 2. Symlink into each tool's discovery path
 ln -s ~/.agent-skills/new-skill ~/.cursor/skills-cursor/new-skill
 ln -s ~/.agent-skills/new-skill ~/.claude/skills/new-skill
+ln -s ~/.agent-skills/new-skill ~/.codex/skills/new-skill
 ```
 
 ### Add a project-specific skill
+
+Project skills are local to the project only. They do NOT symlink to or interact
+with user-level skill directories.
 
 ```bash
 # 1. Create in the project's skills/ directory (source of truth)
 mkdir -p <project>/skills/new-skill
 # Write SKILL.md
 
-# 2. Symlink from both tool discovery paths
+# 2. Symlink from tool discovery paths WITHIN the project only
 ln -s ../../skills/new-skill <project>/.cursor/skills/new-skill
 ln -s ../../skills/new-skill <project>/.claude/skills/new-skill
+ln -s ../../skills/new-skill <project>/.codex/skills/new-skill
 ```
 
 ### Add a tool-specific skill
@@ -91,14 +116,17 @@ Place directly in the tool's user-level directory (no symlink):
 # Cursor-only
 cp -r /path/to/cursor-skill ~/.cursor/skills-cursor/cursor-skill
 
-# Claude-only
+# Claude Code-only
 cp -r /path/to/claude-skill ~/.claude/skills/claude-skill
+
+# Codex-only
+cp -r /path/to/codex-skill ~/.codex/skills/codex-skill
 ```
 
 ### Update a shared skill
 
 Edit files in `~/.agent-skills/<name>/` directly. Symlinks resolve
-automatically — both Cursor and Claude see the changes immediately.
+automatically — Cursor, Claude Code, and Codex see the changes immediately.
 
 ### Remove a shared skill
 
@@ -106,6 +134,7 @@ automatically — both Cursor and Claude see the changes immediately.
 # 1. Remove symlinks first
 rm ~/.cursor/skills-cursor/skill-name
 rm ~/.claude/skills/skill-name
+rm ~/.codex/skills/skill-name
 
 # 2. Remove the source
 rm -rf ~/.agent-skills/skill-name
