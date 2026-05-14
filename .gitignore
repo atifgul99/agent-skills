@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+*.local.*
+.env.local
+
+# Temporary execution files
+.temp-*
+*.tmp
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
