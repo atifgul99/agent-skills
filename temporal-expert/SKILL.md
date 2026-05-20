@@ -28,6 +28,15 @@ automatically. Code is deterministic replay-safe; side effects live in activitie
 - **MCP Integration** (Temporal MCP Server, durable MCP tools, agentic patterns): See [references/mcp-integration.md](references/mcp-integration.md)
 - **Testing** (local test server, mocking, Vitest/pytest patterns): See [references/testing.md](references/testing.md)
 
+## External References
+
+- **Google: Durable AI agent with Gemini and Temporal** — official tutorial
+  building a ReAct-style agentic loop where Gemini handles reasoning and
+  Temporal makes every LLM call + tool call durable. Python example, but the
+  pattern (workflow.unsafe.imports_passed_through, activities for LLM/tool
+  calls, signals for human-in-the-loop) maps directly to TypeScript.
+  https://ai.google.dev/gemini-api/docs/temporal-example
+
 ## Core Concepts (Quick Reference)
 
 ### Architecture
@@ -58,6 +67,7 @@ automatically. Code is deterministic replay-safe; side effects live in activitie
 Workflow code MUST be deterministic. On replay, the same code must produce the same commands.
 
 **NEVER do in workflow code:**
+
 - Network/HTTP calls (use activities)
 - File I/O or database access (use activities)
 - `Math.random()` or `crypto.randomUUID()` (use `workflow.random()` in Python or `uuid4()` from `@temporalio/workflow`)
@@ -67,6 +77,7 @@ Workflow code MUST be deterministic. On replay, the same code must produce the s
 - `setTimeout` / `setInterval` (use `workflow.sleep()` or timers)
 
 **ALWAYS do in workflow code:**
+
 - Call activities via `proxyActivities` (TS) or `workflow.execute_activity` (Python)
 - Use `workflow.sleep()` for delays
 - Use `workflow.condition()` (TS) or `workflow.wait_condition()` (Python) for blocking waits
@@ -75,14 +86,14 @@ Workflow code MUST be deterministic. On replay, the same code must produce the s
 
 ### Timeout Hierarchy
 
-| Timeout | Scope | Default | Use |
-|---------|-------|---------|-----|
-| `workflowExecutionTimeout` | Entire workflow including retries | None | Hard cap on total workflow life |
-| `workflowRunTimeout` | Single workflow run | None | Cap on single execution attempt |
-| `scheduleToCloseTimeout` | Activity: schedule → complete | None | End-to-end activity deadline |
-| `startToCloseTimeout` | Activity: start → complete | None | Execution time limit (most common) |
-| `scheduleToStartTimeout` | Activity: schedule → worker picks up | None | Detect worker backlog |
-| `heartbeatTimeout` | Activity: between heartbeats | None | Detect stuck long activities |
+| Timeout                    | Scope                                | Default | Use                                |
+| -------------------------- | ------------------------------------ | ------- | ---------------------------------- |
+| `workflowExecutionTimeout` | Entire workflow including retries    | None    | Hard cap on total workflow life    |
+| `workflowRunTimeout`       | Single workflow run                  | None    | Cap on single execution attempt    |
+| `scheduleToCloseTimeout`   | Activity: schedule → complete        | None    | End-to-end activity deadline       |
+| `startToCloseTimeout`      | Activity: start → complete           | None    | Execution time limit (most common) |
+| `scheduleToStartTimeout`   | Activity: schedule → worker picks up | None    | Detect worker backlog              |
+| `heartbeatTimeout`         | Activity: between heartbeats         | None    | Detect stuck long activities       |
 
 Rule: Always set `startToCloseTimeout` on every activity. Add `heartbeatTimeout` for activities > 60s.
 
@@ -130,6 +141,7 @@ When changing workflow logic while executions are in-flight:
 **Python**: Use `workflow.patched()` / `workflow.deprecate_patch()`
 
 Three-phase lifecycle:
+
 1. Deploy with `patched('my-change')` guard — new code runs for new + replaying workflows
 2. Once all old executions complete, replace `patched()` with `deprecatePatch()`
 3. Once no replays need the old path, remove the patch entirely
@@ -148,13 +160,13 @@ Three-phase lifecycle:
 
 ## Decision Matrix
 
-| Scenario | Pattern |
-|----------|---------|
-| Multi-step process with rollback | Saga with compensation activities |
-| Waiting for external approval | Signal + `condition()`/`wait_condition()` with timeout |
-| Recurring job (e.g., daily sync) | Schedule → Workflow |
-| Fan-out parallel work | Multiple `executeActivity` / child workflows + `Promise.all` |
-| Long-running process (hours/days) | Heartbeated activities + continue-as-new for large histories |
-| Exactly-once processing | Deterministic workflow ID + idempotent activities |
-| Human-in-the-loop via AI | MCP tools → Temporal signals/queries (see mcp-integration.md) |
-| Publish social post at future time | Schedule or `workflow.sleep()` until publish time |
+| Scenario                           | Pattern                                                       |
+| ---------------------------------- | ------------------------------------------------------------- |
+| Multi-step process with rollback   | Saga with compensation activities                             |
+| Waiting for external approval      | Signal + `condition()`/`wait_condition()` with timeout        |
+| Recurring job (e.g., daily sync)   | Schedule → Workflow                                           |
+| Fan-out parallel work              | Multiple `executeActivity` / child workflows + `Promise.all`  |
+| Long-running process (hours/days)  | Heartbeated activities + continue-as-new for large histories  |
+| Exactly-once processing            | Deterministic workflow ID + idempotent activities             |
+| Human-in-the-loop via AI           | MCP tools → Temporal signals/queries (see mcp-integration.md) |
+| Publish social post at future time | Schedule or `workflow.sleep()` until publish time             |

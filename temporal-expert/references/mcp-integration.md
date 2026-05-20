@@ -22,7 +22,8 @@ Temporal + MCP integration serves two purposes:
 
 Source: [Temporal MCP Server](https://temporal.io/code-exchange/temporal-mcp-server) |
 [Durable MCP Blog](https://temporal.io/blog/durable-mcp-how-to-give-agentic-systems-superpowers) |
-[Long-Running MCP Blog](https://temporal.io/blog/building-long-running-interactive-mcp-tools-temporal)
+[Long-Running MCP Blog](https://temporal.io/blog/building-long-running-interactive-mcp-tools-temporal) |
+[Google: Durable AI agent with Gemini + Temporal (no-MCP, direct ReAct loop)](https://ai.google.dev/gemini-api/docs/temporal-example)
 
 ---
 
@@ -94,14 +95,14 @@ as Temporal workflow starters. The MCP tool starts a workflow; Temporal handles 
 
 ### Why
 
-| Problem with raw MCP tools | Temporal solution |
-|---------------------------|-------------------|
-| MCP client disconnects → tool fails silently | Workflow continues independently |
-| No automatic retry on failure | Built-in retry policies per activity |
-| Limited execution time | Workflows run for days/weeks/months |
-| No visibility into progress | Queries, signals, Web UI |
-| No state persistence | Event-sourced, crash-proof |
-| Hard to compose multiple steps | Workflow orchestrates activities |
+| Problem with raw MCP tools                   | Temporal solution                    |
+| -------------------------------------------- | ------------------------------------ |
+| MCP client disconnects → tool fails silently | Workflow continues independently     |
+| No automatic retry on failure                | Built-in retry policies per activity |
+| Limited execution time                       | Workflows run for days/weeks/months  |
+| No visibility into progress                  | Queries, signals, Web UI             |
+| No state persistence                         | Event-sourced, crash-proof           |
+| Hard to compose multiple steps               | Workflow orchestrates activities     |
 
 ### Basic Pattern (Python — MCP SDK is primarily Python)
 
@@ -243,7 +244,9 @@ export async function campaignExecutionWorkflow(input: CampaignInput): Promise<C
   let approval: { approved: boolean; approvedBy: string } | undefined
 
   setHandler(statusQuery, () => status)
-  setHandler(approvalSignal, (data) => { approval = data })
+  setHandler(approvalSignal, (data) => {
+    approval = data
+  })
   setHandler(pauseSignal, ({ reason }) => {
     paused = true
     log.info('Campaign paused', { reason })
