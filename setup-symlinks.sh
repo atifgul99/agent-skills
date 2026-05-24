@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup symlinks for all shared skills into tool discovery paths
+# Setup symlinks for shared skills into tool discovery paths
 # Fails if any symlink already exists (prevents accidental overwrites)
 
 set -e
@@ -51,10 +51,19 @@ for skill in "$AGENT_SKILLS_DIR"/*; do
 
     echo -n "Processing: $skill_name ... "
 
-    # Check and create symlinks in all three tools
+    # Check and create symlinks in the appropriate tools
     all_ok=true
 
-    for tool_dir in "$CURSOR_SKILLS_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"; do
+    case "$skill_name" in
+        codex)
+            target_dirs=("$CLAUDE_SKILLS_DIR")
+            ;;
+        *)
+            target_dirs=("$CURSOR_SKILLS_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR")
+            ;;
+    esac
+
+    for tool_dir in "${target_dirs[@]}"; do
         symlink_path="$tool_dir/$skill_name"
 
         if [ -e "$symlink_path" ] || [ -L "$symlink_path" ]; then
@@ -67,9 +76,9 @@ for skill in "$AGENT_SKILLS_DIR"/*; do
 
     if [ "$all_ok" = true ]; then
         # Create symlinks
-        ln -s "$skill" "$CURSOR_SKILLS_DIR/$skill_name"
-        ln -s "$skill" "$CLAUDE_SKILLS_DIR/$skill_name"
-        ln -s "$skill" "$CODEX_SKILLS_DIR/$skill_name"
+        for tool_dir in "${target_dirs[@]}"; do
+            ln -s "$skill" "$tool_dir/$skill_name"
+        done
         echo -e "${GREEN}✓ Created${NC}"
         created=$((created + 1))
     fi

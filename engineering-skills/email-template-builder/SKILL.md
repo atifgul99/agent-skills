@@ -1,3 +1,8 @@
+---
+name: email-template-builder
+description: Transactional email skill for React Email templates, provider integration, preview servers, i18n, dark mode, and tracking.
+---
+
 # Email Template Builder
 
 **Tier:** POWERFUL  

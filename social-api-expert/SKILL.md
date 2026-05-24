@@ -1,21 +1,6 @@
 ---
 name: social-api-expert
-description: >
-  Social media API design partner for making developer-facing publishing API decisions.
-  Deep knowledge of 10+ platform APIs (Twitter/X, LinkedIn, Instagram, Facebook,
-  TikTok, YouTube, Pinterest, Reddit, Threads, Bluesky), 7 API competitors
-  (Ayrshare, Zernio, Postproxy, Outstand, Bundle.social, Buffer, Hootsuite),
-  15+ portal competitors (Buffer, Publer, Metricool, Pallyy, SocialBee, Zoho Social,
-  Later, Loomly, Planable, Sendible, ContentStudio, Vista Social, Hootsuite, Sprout Social),
-  and 2 open-source references (Postiz, Mixpost). Use when: making API design decisions
-  (unified vs per-platform calls, sync vs async, content model, error shapes, auth
-  flows, webhook contracts), evaluating trade-offs, designing endpoint signatures,
-  or any "should we do X or Y" question about a social media publishing API.
-  Triggers: "API design", "endpoint shape", "developer experience", "DX",
-  "how should the API", "what should we expose", "sync vs async", "error format",
-  "webhook design", "OAuth flow", "multi-tenant", "rate limit", "analytics API",
-  "SDK design", "competitive analysis", "developer feedback", "forum research",
-  "one call vs many", "unified vs separate", "content model", "API signature".
+description: Social media API design partner for endpoint shapes, auth flows, error contracts, webhook contracts, and unified-vs-per-platform trade-offs.
 ---
 
 # Social Media API Design Partner

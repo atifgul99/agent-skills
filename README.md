@@ -1,7 +1,9 @@
 # Agent Skills
 
-Shared source of truth for AI agent skills. Cursor, Claude Code, and Codex
-discover these via symlinks from their respective user-level skill directories.
+Shared source of truth for AI agent skills. Most skills are shared across
+Cursor, Claude Code, and Codex via symlinks from their respective user-level
+skill directories. Some skills are tool-specific and only symlink into the tool
+that can use them.
 
 ## Directory Layout
 
@@ -33,6 +35,7 @@ discover these via symlinks from their respective user-level skill directories.
 
 ~/.claude/skills/                 # Claude Code user-level discovery
 ├── engineering-skills -> ~/.agent-skills/engineering-skills  # Shared (symlink)
+├── codex -> ~/.agent-skills/codex                              # Claude-only: call Codex from Claude
 └── ...
 
 ~/.codex/skills/                  # Codex user-level discovery
@@ -63,7 +66,10 @@ into `<project>/.cursor/skills/`, `<project>/.claude/skills/`, and
 
 **Tool-specific** — Skills that only make sense in one tool (e.g. Cursor's
 `create-rule`). Stay as real directories in their tool's user-level or project
-path — no symlinks needed.
+path, or live in `~/.agent-skills/<name>/` with symlinks only into the tool that
+uses them. Example: `~/.agent-skills/codex` is Claude Code-only because it
+teaches Claude how to call the Codex CLI; do not symlink it into
+`~/.codex/skills`.
 
 ## Quick Setup
 
@@ -75,7 +81,8 @@ To automatically create symlinks for all shared skills across all three tools:
 
 This script:
 - Enumerates all skills in `~/.agent-skills/`
-- Creates symlinks in `~/.cursor/skills-cursor/`, `~/.claude/skills/`, and `~/.codex/skills/`
+- Creates symlinks in the appropriate tool discovery paths
+- Skips tool-specific exceptions such as `codex` for Codex itself
 - **Fails safely** if any symlink already exists (prevents overwrites)
 
 ## How To
@@ -121,6 +128,16 @@ cp -r /path/to/claude-skill ~/.claude/skills/claude-skill
 
 # Codex-only
 cp -r /path/to/codex-skill ~/.codex/skills/codex-skill
+```
+
+Tool-specific skills may also live in `~/.agent-skills/` when you want them
+versioned with the rest of the shared skill collection. In that case, symlink
+only into the consuming tool. For example, the `codex` skill is consumed by
+Claude Code:
+
+```bash
+ln -s ~/.agent-skills/codex ~/.claude/skills/codex
+# Do not create ~/.codex/skills/codex
 ```
 
 ### Update a shared skill

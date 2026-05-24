@@ -1,3 +1,8 @@
+---
+name: incident-commander
+description: Incident response skill for severity classification, timeline reconstruction, stakeholder communication, and post-incident reviews.
+---
+
 # Incident Commander Skill
 
 **Category:** Engineering Team  

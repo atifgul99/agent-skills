@@ -1,3 +1,8 @@
+---
+name: stripe-integration-expert
+description: Production-grade Stripe integration skill for subscriptions, trials, proration, checkout sessions, webhooks, customer portal, and invoicing.
+---
+
 # Stripe Integration Expert
 
 **Tier:** POWERFUL  
