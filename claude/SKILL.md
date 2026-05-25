@@ -1,7 +1,7 @@
 ---
 name: claude
 description: >
-  Use when Codex needs a second opinion, independent code review, adversarial
+  Codex-only skill. Use when Codex needs a second opinion, independent code review, adversarial
   plan challenge, deep multi-file context analysis, or wants to delegate
   planning/research/editing to Anthropic Claude Code CLI.
   Triggers on: "claude review", "second opinion", "ask claude", "verify with claude",
