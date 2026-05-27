@@ -231,5 +231,5 @@ structure see `10-review-protocol.md`.
 | Missing `color-scheme` on `<html>`    | Inspect root layout — should set `style={{ colorScheme: 'light dark' }}` or CSS `color-scheme`                                                              | Without it, native scrollbars/selects/date pickers don't dark-mode                 |
 
 For the deep Vercel-style code compliance pass (typography characters, autocomplete, hydration,
-touch action, Intl, safe areas, etc.) invoke the `/web-design-guidelines` skill alongside this
+touch action, Intl, safe areas, etc.) invoke `references/11-vercel-compliance.md` alongside this
 catalog. Merge findings in the structure defined by `10-review-protocol.md`.

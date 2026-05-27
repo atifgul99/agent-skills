@@ -41,23 +41,20 @@ foundation for everything else.
 | Redesigning existing UI — Scan → Diagnose → Fix workflow, upgrade techniques, fix priority                                | `references/08-redesign-audit.md`          |
 | Anti-slop layout patterns, Bento 2.0 dashboard paradigm, design intensity calibration                                     | `references/09-creative-arsenal.md`        |
 | Code review **structure** — Critical/Important/Opportunities buckets, output format, severity                             | `references/10-review-protocol.md`         |
-
-**Companion skill:** for code-level Vercel compliance (typography characters, autocomplete,
-hydration safety, touch, `Intl`, safe areas), invoke `/web-design-guidelines` alongside this
-skill. Orchestrated from `references/10-review-protocol.md`.
+| Vercel Web Interface Guidelines compliance — typography characters, autocomplete, hydration, touch, Intl, safe areas      | `references/11-vercel-compliance.md`       |
 
 ---
 
 ## Standard Workflows
 
-| Workflow                       | Mandatory                 | Add when needed                                                                               |
-| ------------------------------ | ------------------------- | --------------------------------------------------------------------------------------------- |
-| **Build a component**          | `01` + `04`               | `03` for the pattern, `02` for spacing/color values                                           |
-| **Build a page or dashboard**  | `01` + `04` + `05`        | `03` for component-level patterns, `09` for distinctive aesthetic                             |
-| **Polish interactions**        | `01` + `07`               | `07` routes to the right designer (`07a` / `07b` / `07c`). `02` for timing-token values.      |
-| **Review code**                | `10` + `06` + `03` + `04` | `02` for visual specifics. Also load `/web-design-guidelines` SKILL.md and follow its checks. |
-| **Audit a motion / animation** | `07` (routes by context)  | Whichever designer reference `07` weights for the project                                     |
-| **Redesign existing UI**       | `08` (Scan→Diagnose→Fix)  | `06` for what to flag during Diagnose, `04` + `02` for the Fix pass                           |
+| Workflow                       | Mandatory                        | Add when needed                                                                          |
+| ------------------------------ | -------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Build a component**          | `01` + `04`                      | `03` for the pattern, `02` for spacing/color values                                      |
+| **Build a page or dashboard**  | `01` + `04` + `05`               | `03` for component-level patterns, `09` for distinctive aesthetic                        |
+| **Polish interactions**        | `01` + `07`                      | `07` routes to the right designer (`07a` / `07b` / `07c`). `02` for timing-token values. |
+| **Review code**                | `10` + `06` + `03` + `04` + `11` | `02` for visual specifics. `11` fetches latest Vercel compliance rules — mandatory.      |
+| **Audit a motion / animation** | `07` (routes by context)         | Whichever designer reference `07` weights for the project                                |
+| **Redesign existing UI**       | `08` (Scan→Diagnose→Fix)         | `06` for what to flag during Diagnose, `04` + `02` for the Fix pass                      |
 
 **Load lazily.** Don't preload everything in the "Add when needed" column. Pull a file only
 when the task actually asks the question that file answers.

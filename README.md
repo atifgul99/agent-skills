@@ -25,7 +25,6 @@ that can use them.
 ├── remotion-best-practices/    # Remotion — video creation in React
 ├── t5-image-prompts/            # Image prompt engine + generator (7 modes)
 ├── temporal-expert/             # Temporal.io workflow orchestration
-├── web-design-guidelines/       # Vercel 100+ UX/accessibility rules
 └── README-pm-skills-archive.md  # Archive of removed PM skills (reinstall guide)
 
 ~/.cursor/skills-cursor/          # Cursor user-level discovery
@@ -80,6 +79,7 @@ To automatically create symlinks for all shared skills across all three tools:
 ```
 
 This script:
+
 - Enumerates all skills in `~/.agent-skills/`
 - Creates symlinks in the appropriate tool discovery paths
 - Skips tool-specific exceptions such as `codex` for Codex itself

@@ -1,7 +1,7 @@
 # 10 — Code Review Protocol (Structure)
 
-How to structure a UX code review: severity buckets, output format, orchestration with
-`/web-design-guidelines`. This file is the **structure** for reviews. **What to flag** lives
+How to structure a UX code review: severity buckets, output format, orchestration with the
+Vercel compliance pass. This file is the **structure** for reviews. **What to flag** lives
 in `06-anti-patterns.md` (catalog) and the specialized references (`02` for spacing/colors,
 `03` for patterns, `04` for implementation, `07` for motion).
 
@@ -10,7 +10,7 @@ in `06-anti-patterns.md` (catalog) and the specialized references (`02` for spac
 > - For the canonical list of issues to flag → `06-anti-patterns.md`
 > - For the persona and communication standards driving review tone → `01-persona-and-principles.md`
 > - For the redesign workflow that uses the same severity buckets → `08-redesign-audit.md`
-> - For code-level Vercel compliance (invoked alongside this protocol) → `/web-design-guidelines`
+> - For code-level Vercel compliance (loaded alongside this protocol) → `11-vercel-compliance.md`
 
 ---
 
@@ -39,12 +39,11 @@ competitive context and project-specific constraints.
 
 ---
 
-## Companion Skill: `web-design-guidelines`
+## Vercel Compliance Pass (Mandatory)
 
-`web-design-guidelines` is a **sibling skill, not a CLI tool.** To use it: read
-`~/.agent-skills/web-design-guidelines/SKILL.md` and apply its checks to the same files you're
-reviewing. It catches code-level compliance issues this protocol intentionally does **not**
-duplicate:
+Load `references/11-vercel-compliance.md` and follow its methodology — `WebFetch` the latest
+guidelines, apply the rules, emit terse `file:line` findings. The persona-driven review
+intentionally does **not** duplicate these categories:
 
 - Typography characters (`…` vs `...`, curly vs straight quotes, `&nbsp;` in measurements)
 - Form `autocomplete`, semantic `type`, `inputmode`, spellcheck
@@ -55,8 +54,9 @@ duplicate:
 - `<link rel="preconnect">`, font preload, virtualization triggers
 - Safe-area-inset, `color-scheme`, `theme-color`
 
-Merge findings into your final report under the appropriate severity buckets below.
-**Skipping this is a review gap**, not an option — note it explicitly if you couldn't apply it.
+Merge findings into your final report under "Compliance Findings (from
+web-interface-guidelines)" in the Output Format section. **Skipping this is a review gap**,
+not an option — note it explicitly if `WebFetch` was unavailable.
 
 ---
 
@@ -76,7 +76,7 @@ duplicate them here.
 | Performance (lazy load, image dims, Server Components, Suspense, virtualization)           | `04-implementation-build.md` → Performance Building Blocks                                   |
 | Content and i18n (no hardcoded strings, locale formatters, RTL verified)                   | `04-implementation-build.md` → Internationalization                                          |
 | Anti-patterns (AI tells, dark patterns, technical anti-patterns)                           | `06-anti-patterns.md` (full catalog)                                                         |
-| Code-level compliance (typography chars, autocomplete, hydration, touch, Intl, safe areas) | Invoke `/web-design-guidelines`                                                              |
+| Code-level compliance (typography chars, autocomplete, hydration, touch, Intl, safe areas) | `references/11-vercel-compliance.md`                                                         |
 
 For project-specific items (locale parity, design tokens specific to that codebase, competitive
 benchmarks), also consult the project skill (e.g. `postbuzz_ux_architect`).
@@ -151,7 +151,7 @@ Every review emits this exact structure.
 📋 UX REVIEW — [Component / File / PR Name]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔴 [N] Critical  |  🟡 [N] Important  |  🟢 [N] Opportunities
-Reviewed by: elite-ux-architect (+ /web-design-guidelines)
+Reviewed by: elite-ux-architect (+ Vercel compliance pass)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ## Overall Assessment
@@ -184,7 +184,7 @@ Reviewed by: elite-ux-architect (+ /web-design-guidelines)
 - [Concrete observation — file:line]
 - [Concrete observation]
 
-## Compliance Findings (from /web-design-guidelines)
+## Compliance Findings (from Vercel Web Interface Guidelines)
 
 [Merged list of file:line violations from the Vercel guidelines pass, deduplicated against
 the issues above. Reference categories: typography, forms, animation, performance,
@@ -250,6 +250,6 @@ focus. The fix is consistency, not accessibility.
 - **Strategy and roadmap decisions** — that's the persona's job, see `01-persona-and-principles.md`
 - **Building new UI from scratch** — load `02` + `03` + `04` instead
 - **Motion-only audits** — use `07-motion-framework.md` directly
-- **Pure compliance scan** — use `/web-design-guidelines` directly without this protocol
+- **Pure compliance scan** — load only `references/11-vercel-compliance.md` and follow its methodology
 - **Brand strategy / competitive intelligence** — that's the project skill's domain
 - **Redesign workflow** — that's `08-redesign-audit.md`

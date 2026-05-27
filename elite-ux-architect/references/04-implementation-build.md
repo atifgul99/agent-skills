@@ -9,7 +9,7 @@ safety, z-index discipline, dependency verification, and performance building bl
 > - Component patterns (skeleton, error, empty state) → `03-component-patterns.md`
 > - Motion craft and animation → `07-motion-framework.md` and `07a-emil-craft.md`
 > - Anti-pattern catalog → `06-anti-patterns.md`
-> - Code-level compliance (autocomplete, safe areas, Intl, touch) → invoke `/web-design-guidelines`
+> - Code-level compliance (autocomplete, safe areas, Intl, touch) → load `references/11-vercel-compliance.md`
 
 ---
 
@@ -349,4 +349,4 @@ Quick reject list. Full catalog → `06-anti-patterns.md`.
 
 ## Browser and Standards Compliance
 
-For deep code-level compliance checks (typography characters, autocomplete attributes, hydration, touch-action, Intl, safe-area insets) against web-interface guidelines, invoke the `/web-design-guidelines` skill. It fetches the latest checklist and emits `file:line` violations.
+For deep code-level compliance checks (typography characters, autocomplete attributes, hydration, touch-action, Intl, safe-area insets) against web-interface guidelines, invoke `references/11-vercel-compliance.md`. It fetches the latest checklist and emits `file:line` violations.

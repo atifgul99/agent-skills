@@ -66,7 +66,6 @@ Always specify `-m` and `-c model_reasoning_effort` explicitly — never rely on
 
 | Model                 | Via `codex exec`?             | Reasoning levels            | Use for                                                                                 |
 | --------------------- | ----------------------------- | --------------------------- | --------------------------------------------------------------------------------------- |
-| ~~`gpt-5.5`~~         | **BANNED**                    | —                           | **Never use. Too slow, too expensive. Use `gpt-5.4` instead.**                          |
 | `gpt-5.4`             | Yes                           | low / medium / high / xhigh | Standard workhorse. All reviews, verification, analysis — including deep/security work. |
 | `gpt-5.4-mini`        | Yes                           | low / medium / high / xhigh | Fast and cheap. Quick lookups, routine tasks, trivial fact-checks.                      |
 | `gpt-5.3-codex`       | Yes                           | low / medium / high / xhigh | Legacy. Avoid for new tasks — OpenAI nudges toward gpt-5.4.                             |
@@ -75,7 +74,6 @@ Always specify `-m` and `-c model_reasoning_effort` explicitly — never rely on
 
 **Decision rules:**
 
-- **NEVER use `gpt-5.5` — it is banned. Do not use it under any circumstances, even for "hard" tasks.**
 - Default to `gpt-5.4 + medium` for most tasks — good balance of quality and speed
 - Escalate to `gpt-5.4 + high` for architecture decisions, security review, multi-file deep analysis
 - Drop to `gpt-5.4-mini + low` for quick lookups and cheap/fast passes
@@ -119,9 +117,45 @@ codex review --uncommitted "Focus on auth logic and error handling" 2>/dev/null
 ```
 
 The `codex review` subcommand is read-only and uses the user's configured default model
-from `~/.codex/config.toml` — **not** the explicit `-m` flag. If your config.toml default
-is `gpt-5.5`, run `codex config set model gpt-5.4` once to enforce the ban globally.
+from `~/.codex/config.toml` unless you override it with `-c model="..."`. It does **not**
+take `-m`, so model selection for `codex review` is done through config overrides.
 No sandbox flags needed — it cannot modify files.
+
+### `-c` config overrides
+
+`-c` overrides any Codex config key for that invocation. The value is parsed as TOML.
+
+```bash
+codex review --uncommitted -c model="gpt-5.4"
+codex review --uncommitted -c model_reasoning_effort="high"
+codex review --uncommitted -c features.hooks=false
+codex review --uncommitted -c 'shell_environment_policy.inherit="all"'
+codex review --uncommitted -c 'sandbox_permissions=["disk-full-read-access"]'
+```
+
+Use this pattern for any key that exists in `~/.codex/config.toml`, including nested keys.
+Common overrides that matter in practice:
+
+- `model`
+- `model_reasoning_effort`
+- `features.*`
+- `shell_environment_policy.*`
+- `notify`
+- `tui.*`
+- `desktop.*`
+- `plugins.*`
+- `projects.*`
+
+If you need to see whether a key is recognized by your installed CLI, use `codex --help`
+or `codex review --help`; if you want Codex to fail on unknown config fields, add
+`--strict-config`.
+
+Because `codex review` is non-interactive but unbounded, wrap it in an external timeout when
+you care about spend:
+
+```bash
+timeout 10m codex review --uncommitted -c model="gpt-5.4" 2>/dev/null
+```
 
 ### Standard Research / Second Opinion
 

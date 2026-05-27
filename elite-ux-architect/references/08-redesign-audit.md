@@ -164,5 +164,5 @@ When reporting findings during the Diagnose phase, use the severity-tagged table
 | 🟢 | [idea] | `file:line` | [impact] |
 ```
 
-When proposing fixes during the Fix phase, also invoke `/web-design-guidelines` on the same
+When proposing fixes during the Fix phase, also load `references/11-vercel-compliance.md` on the same
 files for code-level compliance checks.
