@@ -1,0 +1,60 @@
+{
+  "skill_name": "elite-ux-architect",
+  "notes": "Diverse baseline test set covering the four main workflows (build, review, polish, redesign) plus router-selection cases. Run a baseline (no skill) and a with-skill subagent per eval and compare. See SKILL.md 'Standard Workflows' for expected file loads per prompt.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "build-form-component",
+      "workflow": "build",
+      "prompt": "Build a sign-up form in React + Tailwind with email, password, and 'I agree to terms' checkbox. Production-quality: state completeness, accessibility, mobile-first, no AI-tell visual patterns.",
+      "expected_loads": ["01", "04", "03"],
+      "expected_output": "A single .tsx file with labeled inputs, autocomplete attrs, inputmode, disabled state, error state, focus-visible rings, touch-target sizing, and no hardcoded palette classes.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "review-dashboard-pr",
+      "workflow": "review",
+      "prompt": "Review this dashboard component for UX issues. Cite file:line for every finding. Use Critical / Important / Opportunity buckets.",
+      "expected_loads": ["10", "06", "11"],
+      "expected_output": "Structured review using the exact Output Format template. State-completeness grep should be run before claiming completeness. Severity should match the user-blocking-impact principle (no over-claiming Critical for missing focus-visible when there is no outline suppression).",
+      "files": ["fixtures/dashboard.tsx"]
+    },
+    {
+      "id": 3,
+      "name": "polish-modal-motion",
+      "workflow": "polish",
+      "prompt": "This dialog feels janky. Polish the open/close motion and the focus handoff. The project ships shipping-style polish, not playful CSS-art.",
+      "expected_loads": ["01", "07", "07b"],
+      "expected_output": "Routes to Jakub Krehel (production polish), not Jhey (experimental). Specifies easing curves and durations as tokens, includes prefers-reduced-motion, uses transform/opacity (never layout properties).",
+      "files": ["fixtures/dialog.tsx"]
+    },
+    {
+      "id": 4,
+      "name": "redesign-landing-hero",
+      "workflow": "redesign",
+      "prompt": "Our landing-page hero looks like a 2018 SaaS template. Make it feel current without rebuilding from scratch. Diagnose first, then fix.",
+      "expected_loads": ["08", "06", "09", "05"],
+      "expected_output": "Follows Scan → Diagnose → Fix. Diagnose phase cites concrete AI-tells from 06. Fix proposes Bento 2.0 or anti-slop creative direction from 09. Does not rebuild from scratch.",
+      "files": ["fixtures/landing-hero.tsx"]
+    },
+    {
+      "id": 5,
+      "name": "router-discipline-pure-data-table",
+      "workflow": "review",
+      "prompt": "Review this read-only data table that fetches rows and renders them. No animation, no forms, no modals.",
+      "expected_loads": ["10", "06", "11"],
+      "expected_output": "Should NOT load 07 (no motion), 05 (no landing-page), 09 (no aesthetic ask), 07a/07b/07c. Demonstrates lazy-load discipline — small token footprint.",
+      "files": ["fixtures/data-table.tsx"]
+    },
+    {
+      "id": 6,
+      "name": "router-discipline-motion-only",
+      "workflow": "motion-audit",
+      "prompt": "Audit the page-transition animation only. Tell me which timing / easing / approach is off.",
+      "expected_loads": ["07"],
+      "expected_output": "Loads 07 (motion framework), then routes to one designer reference (07a / 07b / 07c) based on project polish level. Does NOT load 10 (this is not a code review), 03, 04, or 06.",
+      "files": ["fixtures/page-transition.tsx"]
+    }
+  ]
+}

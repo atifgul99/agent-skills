@@ -25,17 +25,23 @@ in `06-anti-patterns.md` (catalog) and the specialized references (`02` for spac
 
 ## Setup — What to Load
 
-This protocol drives the structure. To know what to flag, also load:
+This protocol drives the structure. Load lazily based on what the code actually does.
+
+**Mandatory for every review:**
 
 - `06-anti-patterns.md` — the canonical catalog of things to flag
-- `02-pixel-perfect-standards.md` — for spacing/typography/color violations
-- `03-component-patterns.md` — for pattern expectations (forms, modals, states)
+- `11-vercel-compliance.md` — code-level compliance pass (run its WebFetch step)
 
-For motion-heavy code, also load `07-motion-framework.md` and route to the right designer
-reference based on project context.
+**Load only when the code under review touches that category:**
 
-For project-specific code, also load the project's UX skill (e.g. `postbuzz_ux_architect`) for
-competitive context and project-specific constraints.
+- `02-pixel-perfect-standards.md` — only when flagging spacing / typography / color / radius values
+- `03-component-patterns.md` — only when reviewing forms, modals, tables, navigation, or state UI
+- `04-implementation-build.md` — only when reviewing Tailwind/CVA, hydration, viewport, or performance
+- `07-motion-framework.md` (+ designer ref) — only for motion-heavy code
+- Project skill (e.g. `postbuzz_ux_architect`) — only when competitive context or project-specific tokens matter
+
+Loading everything for every review is wasteful. A pure-data table review doesn't need motion or
+landing-page references. Be honest about what the code does, then pull just those files.
 
 ---
 
@@ -197,38 +203,41 @@ accessibility, hydration, touch, i18n, safe-areas.]
 
 ---
 
-## Severity Definitions
+## Severity — One Principle
 
-Severity is determined by **user-blocking impact**, not by how strongly the rule feels
-violated. When in doubt, downgrade.
+**Severity equals user-blocking impact.** Not how strongly the rule feels violated, not how
+much the linter would complain, not how senior-engineer-correct the fix would be. Ask: "Can a
+real user complete their task right now?" Then:
 
-- **🔴 Critical — blocks merge.** Accessibility failure that blocks keyboard or screen-reader
-  users (e.g. `<div onClick>` with no role/tabindex, `outline: none` with no focus-visible
-  replacement, form input missing `<label>`), security vulnerability, broken core flow,
-  destructive action without confirmation, missing required state (`empty/loading/error` for a
-  populated view), missing `loading.tsx` or `error.tsx` for a route with `page.tsx`,
-  hardcoded user-facing strings in a project with i18n configured.
-- **🟡 Important — should fix this PR.** Standards violation the user will feel but won't block
-  them. Hardcoded design tokens, missing hover states, `transition-all` instead of specific
-  properties, suboptimal animation, missing `prefers-reduced-motion` in a motion-heavy
-  component, no explicit `type` on a `<button>` inside a form, `<img>` without explicit
-  `width`/`height`, raw layout Tailwind in a project that has layout primitives.
-- **🟢 Opportunity — could enhance.** Optical alignment, additional polish, a better creative
-  pattern, performance optimization beyond targets, focus-visible style missing **but no
-  `outline-none` present** (browser default ring still works — not blocking).
+- **🔴 Critical — they cannot.** Merge blocker.
+- **🟡 Important — they can, but it's degraded.** Fix in this PR.
+- **🟢 Opportunity — they can, and it works fine.** Polish for next iteration.
 
-### Severity calibration: when "missing focus-visible" is what
+When in doubt, downgrade. Over-claiming Critical is the most common audit failure — it burns
+trust and trains the reader to ignore future findings.
 
-| Code state                                        | Severity                                                                                   |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `outline: none` with no replacement               | 🔴 Critical (keyboard users have no focus indicator)                                       |
-| `outline-none` with no replacement                | 🔴 Critical (same)                                                                         |
-| No explicit focus-visible, no outline suppression | 🟢 Opportunity (browser default works — should match design system, but not user-blocking) |
-| Has `focus-visible:ring-*` but inconsistent token | 🟡 Important (style drift)                                                                 |
+### Applying the principle — worked examples
 
-The audit error to avoid: claiming a button is "keyboard inaccessible" when it has no explicit
-focus styles AND no outline suppression. The browser draws a default ring; the user can see
-focus. The fix is consistency, not accessibility.
+| Situation                                                                | Reasoning                                                          | Severity       |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------ | -------------- |
+| `<div onClick>` is the only way to trigger a primary action              | Keyboard user is blocked                                           | 🔴 Critical    |
+| `outline: none` (or `outline-none`) with no `focus-visible:` replacement | Keyboard user sees nothing on focus                                | 🔴 Critical    |
+| Form input has no `<label>` / `aria-label` / `aria-labelledby`           | Screen-reader user cannot identify the field                       | 🔴 Critical    |
+| Destructive action (delete, cancel sub) fires with no confirmation       | One misclick = data loss                                           | 🔴 Critical    |
+| Populated view ships without empty / loading / error states              | User sees broken UI in real conditions                             | 🔴 Critical    |
+| Missing `loading.tsx` / `error.tsx` for a route with `page.tsx`          | White flash + framework-default error page — degraded, not blocked | 🟡 Important   |
+| Hardcoded user-facing string in an i18n-configured project               | Wrong-language users see English; readable but breaks parity       | 🟡 Important   |
+| `transition-all` animating layout properties                             | Janky animation; flow still works                                  | 🟡 Important   |
+| `<img>` with no explicit width/height                                    | CLS hit; image still loads                                         | 🟡 Important   |
+| Raw `flex gap-*` in a project with layout primitives                     | Inconsistency, not user impact                                     | 🟡 Important   |
+| No `focus-visible:ring-*` AND no `outline-none` (browser default rings)  | Keyboard user sees the browser default — not blocked               | 🟢 Opportunity |
+| Inconsistent focus token across two buttons                              | Style drift; still focusable                                       | 🟡 Important   |
+| Stagger / spring missing on a list                                       | Functional; could feel nicer                                       | 🟢 Opportunity |
+| Pure-black shadow that could be tinted                                   | Functional; could adapt better                                     | 🟢 Opportunity |
+
+The audit error to avoid most aggressively: claiming a button is "keyboard inaccessible" when
+it has no explicit focus styles AND no outline suppression. The browser draws a default ring.
+The user can see focus. The fix is consistency (🟡), not accessibility (🔴).
 
 ---
 
