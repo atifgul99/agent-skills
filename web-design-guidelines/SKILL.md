@@ -1,6 +1,6 @@
 ---
 name: web-design-guidelines
-description: "Use when checking code compliance specifically with Vercel's Web Interface Guidelines. Narrow scope — not a general UX or design audit."
+description: "Vercel's Web Interface Guidelines compliance checker. Fetches the latest 80+ code-level rules and emits file:line violations. Use when reviewing existing frontend code for: typography characters (… vs ..., curly quotes, &nbsp; in measurements), form attributes (autocomplete, semantic type, inputmode, spellcheck, htmlFor), hydration safety (controlled value + onChange, SSR/client mismatch, suppressHydrationWarning), touch behavior (touch-action, overscroll-behavior, inert, -webkit-tap-highlight-color), animation rules (transform/opacity only, transform-origin, no transition:all), accessibility (aria-label, focus-visible, semantic HTML, scroll-margin-top), URL state management (deep-linking filters/tabs/pagination), Intl APIs (DateTimeFormat, NumberFormat, translate=no), safe areas (env(safe-area-inset-*)), dark mode (color-scheme, theme-color), performance (preconnect, font preload, virtualization, content-visibility), or content handling (truncate, line-clamp, min-w-0, text-wrap: balance). Invoke alongside elite-ux-architect's review-protocol for comprehensive code review — this tool catches code-level violations, elite-ux-architect catches design/UX violations. Output is terse file:line format. Not a general UX or design audit."
 risk: safe
 source: community
 date_added: '2026-02-27'

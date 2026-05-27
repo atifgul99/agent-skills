@@ -22,15 +22,21 @@ not need a skill that teaches Claude how to call Codex.
 
 ## When to Use This Skill
 
-| Trigger | Mode |
-|---|---|
-| Review uncommitted changes | `codex review --uncommitted` |
-| Review branch vs main | `codex review --base main` |
-| Challenge a plan / design decision | adversarial review (`codex exec`) |
-| Verify an architecture approach | research query (`codex exec`) |
-| Delegate a write/edit task | `codex exec` with workspace-write sandbox |
-| Continue a previous Codex session | `codex exec resume --last` |
-| Quick fact-check or lookup | `codex exec` with `gpt-5.4-mini` |
+| Trigger                                        | Mode                                                 |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| Signoff / review of written code (uncommitted) | `codex review --uncommitted` ← **always start here** |
+| Signoff / review of a branch vs main           | `codex review --base main`                           |
+| Pure plan review (no code written yet)         | `codex exec` with structured prompt                  |
+| Challenge a plan / design decision             | adversarial review (`codex exec`)                    |
+| Verify an architecture approach                | research query (`codex exec`)                        |
+| Delegate a write/edit task                     | `codex exec` with workspace-write sandbox            |
+| Continue a previous Codex session              | `codex exec resume --last`                           |
+| Quick fact-check or lookup                     | `codex exec` with `gpt-5.4-mini`                     |
+
+**The golden rule: if there is uncommitted code to review, use `codex review --uncommitted`.
+Only reach for `codex exec` when there is NO diff yet (pure plan/architecture review) or when
+you need workspace-write access. Never use `codex exec` as a substitute for `codex review`
+just because the prompt is more structured — `codex review` accepts a focus hint too.**
 
 Use Codex when independence matters: approval gates, code review, architecture choices,
 security-sensitive changes, migration plans, destructive operations, or any situation where
@@ -58,22 +64,23 @@ behind pasted snippets.
 Always specify `-m` and `-c model_reasoning_effort` explicitly — never rely on the user's
 `~/.codex/config.toml` default, which can change at any time. Pick based on task complexity:
 
-| Model | Via `codex exec`? | Reasoning levels | Use for |
-|---|---|---|---|
-| `gpt-5.5` | Yes | low / medium / high / xhigh | Hard problems. Novel architecture, security review, deep multi-file analysis. |
-| `gpt-5.4` | Yes | low / medium / high / xhigh | Standard workhorse. Most reviews, verification, everyday analysis. |
-| `gpt-5.4-mini` | Yes | low / medium / high / xhigh | Fast and cheap. Quick lookups, routine tasks, trivial fact-checks. |
-| `gpt-5.3-codex` | Yes | low / medium / high / xhigh | Legacy. Avoid for new tasks — OpenAI nudges toward gpt-5.4. |
-| `gpt-5.2` | Yes | low / medium / high / xhigh | Old. Avoid. |
-| `gpt-5.3-codex-spark` | **No** — interactive TUI only | — | **Cannot be used in `codex exec`.** Will fail silently. Use `gpt-5.4-mini` instead. |
+| Model                 | Via `codex exec`?             | Reasoning levels            | Use for                                                                                 |
+| --------------------- | ----------------------------- | --------------------------- | --------------------------------------------------------------------------------------- |
+| ~~`gpt-5.5`~~         | **BANNED**                    | —                           | **Never use. Too slow, too expensive. Use `gpt-5.4` instead.**                          |
+| `gpt-5.4`             | Yes                           | low / medium / high / xhigh | Standard workhorse. All reviews, verification, analysis — including deep/security work. |
+| `gpt-5.4-mini`        | Yes                           | low / medium / high / xhigh | Fast and cheap. Quick lookups, routine tasks, trivial fact-checks.                      |
+| `gpt-5.3-codex`       | Yes                           | low / medium / high / xhigh | Legacy. Avoid for new tasks — OpenAI nudges toward gpt-5.4.                             |
+| `gpt-5.2`             | Yes                           | low / medium / high / xhigh | Old. Avoid.                                                                             |
+| `gpt-5.3-codex-spark` | **No** — interactive TUI only | —                           | **Cannot be used in `codex exec`.** Will fail silently. Use `gpt-5.4-mini` instead.     |
 
 **Decision rules:**
+
+- **NEVER use `gpt-5.5` — it is banned. Do not use it under any circumstances, even for "hard" tasks.**
 - Default to `gpt-5.4 + medium` for most tasks — good balance of quality and speed
-- Escalate to `gpt-5.5 + high` for architecture decisions, security review, multi-file deep analysis
-- Use `gpt-5.5 + xhigh` only when maximum reasoning depth is genuinely needed
+- Escalate to `gpt-5.4 + high` for architecture decisions, security review, multi-file deep analysis
 - Drop to `gpt-5.4-mini + low` for quick lookups and cheap/fast passes
-- Prefer `codex exec` over `codex review` when you need explicit model routing, structured output, project-specific acceptance criteria, or adversarial plan review.
-- Prefer native `codex review` for fast broad scans of uncommitted changes or branch-vs-base diffs where default model routing is acceptable.
+- **Always use `codex review --uncommitted` when code exists in the working tree — never substitute `codex exec` for this.**
+- Only use `codex exec` when there is no diff yet (pure plan review), when workspace-write is needed, or for quick fact-checks.
 
 ---
 
@@ -111,7 +118,9 @@ codex review --commit <sha> 2>/dev/null
 codex review --uncommitted "Focus on auth logic and error handling" 2>/dev/null
 ```
 
-The `codex review` subcommand is read-only and uses the user's configured default model.
+The `codex review` subcommand is read-only and uses the user's configured default model
+from `~/.codex/config.toml` — **not** the explicit `-m` flag. If your config.toml default
+is `gpt-5.5`, run `codex config set model gpt-5.4` once to enforce the ban globally.
 No sandbox flags needed — it cannot modify files.
 
 ### Standard Research / Second Opinion
@@ -132,7 +141,7 @@ codex exec \
 
 ```bash
 codex exec \
-  -m gpt-5.5 \
+  -m gpt-5.4 \
   -c model_reasoning_effort="high" \
   --sandbox read-only \
   --full-auto \
@@ -147,22 +156,31 @@ codex exec \
 Use this when Claude wants Codex to approve a plan, diff, or release decision. Codex must be
 allowed to block.
 
-```bash
-codex exec \
-  -m gpt-5.5 \
-  -c model_reasoning_effort="high" \
-  --sandbox read-only \
-  --full-auto \
-  --skip-git-repo-check \
-  "Context: [project]. @/CLAUDE.md @/AGENTS.md.
-   Review surface: [paths / diff / branch].
-   Acceptance criteria: [criteria].
-   Commands already run: [commands and results].
-   Decision needed: approve, approve-with-nits, block, or needs-more-evidence.
-   Be brutal and evidence-first. Findings must cite file:line or exact missing evidence.
-   Do not approve if tests are missing, the diff is too broad, behavior is ambiguous,
-   or the implementation relies on unverified assumptions." 2>/dev/null
-```
+**Route based on whether code exists:**
+
+- **Code is written (uncommitted diff exists)** → use `codex review --uncommitted` with a focus hint:
+
+  ```bash
+  codex review --uncommitted "Focus on [specific concerns]. Flag any bugs, type errors, security issues, or missing edge cases." 2>/dev/null
+  ```
+
+- **Pure plan sign-off (no code yet)** → use `codex exec`:
+  ```bash
+  codex exec \
+    -m gpt-5.4 \
+    -c model_reasoning_effort="high" \
+    --sandbox read-only \
+    --full-auto \
+    --skip-git-repo-check \
+    "Context: [project]. @/CLAUDE.md @/AGENTS.md.
+     Review surface: [paths / diff / branch].
+     Acceptance criteria: [criteria].
+     Commands already run: [commands and results].
+     Decision needed: approve, approve-with-nits, block, or needs-more-evidence.
+     Be brutal and evidence-first. Findings must cite file:line or exact missing evidence.
+     Do not approve if tests are missing, the diff is too broad, behavior is ambiguous,
+     or the implementation relies on unverified assumptions." 2>/dev/null
+  ```
 
 ### Write / Edit Task (workspace-write sandbox)
 
@@ -194,7 +212,7 @@ codex exec \
 
 ```bash
 codex exec \
-  -m gpt-5.5 \
+  -m gpt-5.4 \
   -c model_reasoning_effort="xhigh" \
   --sandbox read-only \
   --full-auto \
@@ -248,7 +266,10 @@ Return:
 
 ---
 
-## Structured Output Discipline
+## Structured Output Discipline (`codex exec` only)
+
+This section applies to `codex exec` prompts only — `codex review` produces its own
+structured output automatically.
 
 Always ask Codex to return these sections:
 
@@ -284,6 +305,7 @@ Treat Codex as a **hard-nosed peer reviewer, not an authority**. It can be wrong
   a narrower prompt or better repository evidence.
 
 **When Codex is wrong:**
+
 1. State the disagreement clearly to the user
 2. Provide evidence (your knowledge, web search, documentation)
 3. Optionally resume the session to discuss peer-to-peer:
@@ -297,10 +319,10 @@ What's your reasoning?" | codex exec --skip-git-repo-check resume --last 2>/dev/
 
 ## Sandbox Mode Reference
 
-| Mode | Flag | Use when |
-|---|---|---|
-| Read-only review | `--sandbox read-only` | Analysis, review, research — **default for all exec calls** |
-| Apply local edits | `--sandbox workspace-write` | Refactoring, writing new files — confirm with user first |
+| Mode                       | Flag                           | Use when                                                        |
+| -------------------------- | ------------------------------ | --------------------------------------------------------------- |
+| Read-only review           | `--sandbox read-only`          | Analysis, review, research — **default for all exec calls**     |
+| Apply local edits          | `--sandbox workspace-write`    | Refactoring, writing new files — confirm with user first        |
 | Full network/system access | `--sandbox danger-full-access` | Only if task explicitly needs it — **always confirm with user** |
 
 ---
@@ -343,7 +365,7 @@ Before accepting Codex's suggestions:
 2. Flag any disagreements or concerns
 3. State the disposition exactly: approve, approve-with-nits, block, or needs-more-evidence
 4. If blocked, list the minimum changes or evidence needed to unblock
-5. Remind user they can resume: "You can continue this Codex session anytime — just ask me to resume it"
+5. If the run was `codex exec` (not `codex review`): remind user they can resume — "You can continue this Codex session anytime — just ask me to resume it"
 6. Confirm whether to apply, investigate further, or discard the findings
 
 ---
