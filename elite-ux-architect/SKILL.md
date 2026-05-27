@@ -50,14 +50,14 @@ skill. Orchestrated from `references/10-review-protocol.md`.
 
 ## Standard Workflows
 
-| Workflow                       | Mandatory                | Add when needed                                                                             |
-| ------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------- |
-| **Build a component**          | `01` + `04`              | `03` for the pattern, `02` for spacing/color values                                         |
-| **Build a page or dashboard**  | `01` + `04` + `05`       | `03` for component-level patterns, `09` for distinctive aesthetic                           |
-| **Polish interactions**        | `01` + `07`              | `07` routes to the right designer (`07a` / `07b` / `07c`). `02` for timing-token values.    |
-| **Review code**                | `10` (drives structure)  | `06` for the catalog of things to flag. Also invoke `/web-design-guidelines` on same files. |
-| **Audit a motion / animation** | `07` (routes by context) | Whichever designer reference `07` weights for the project                                   |
-| **Redesign existing UI**       | `08` (Scan→Diagnose→Fix) | `06` for what to flag during Diagnose, `04` + `02` for the Fix pass                         |
+| Workflow                       | Mandatory                 | Add when needed                                                                               |
+| ------------------------------ | ------------------------- | --------------------------------------------------------------------------------------------- |
+| **Build a component**          | `01` + `04`               | `03` for the pattern, `02` for spacing/color values                                           |
+| **Build a page or dashboard**  | `01` + `04` + `05`        | `03` for component-level patterns, `09` for distinctive aesthetic                             |
+| **Polish interactions**        | `01` + `07`               | `07` routes to the right designer (`07a` / `07b` / `07c`). `02` for timing-token values.      |
+| **Review code**                | `10` + `06` + `03` + `04` | `02` for visual specifics. Also load `/web-design-guidelines` SKILL.md and follow its checks. |
+| **Audit a motion / animation** | `07` (routes by context)  | Whichever designer reference `07` weights for the project                                     |
+| **Redesign existing UI**       | `08` (Scan→Diagnose→Fix)  | `06` for what to flag during Diagnose, `04` + `02` for the Fix pass                           |
 
 **Load lazily.** Don't preload everything in the "Add when needed" column. Pull a file only
 when the task actually asks the question that file answers.

@@ -39,10 +39,12 @@ competitive context and project-specific constraints.
 
 ---
 
-## Companion Skill: `/web-design-guidelines`
+## Companion Skill: `web-design-guidelines`
 
-After your persona-driven review, invoke `/web-design-guidelines` on the same files. It
-catches code-level compliance issues this protocol intentionally does **not** duplicate:
+`web-design-guidelines` is a **sibling skill, not a CLI tool.** To use it: read
+`~/.agent-skills/web-design-guidelines/SKILL.md` and apply its checks to the same files you're
+reviewing. It catches code-level compliance issues this protocol intentionally does **not**
+duplicate:
 
 - Typography characters (`…` vs `...`, curly vs straight quotes, `&nbsp;` in measurements)
 - Form `autocomplete`, semantic `type`, `inputmode`, spellcheck
@@ -53,8 +55,8 @@ catches code-level compliance issues this protocol intentionally does **not** du
 - `<link rel="preconnect">`, font preload, virtualization triggers
 - Safe-area-inset, `color-scheme`, `theme-color`
 
-Merge `/web-design-guidelines` findings into your final report under the appropriate severity
-buckets below.
+Merge findings into your final report under the appropriate severity buckets below.
+**Skipping this is a review gap**, not an option — note it explicitly if you couldn't apply it.
 
 ---
 
@@ -78,6 +80,65 @@ duplicate them here.
 
 For project-specific items (locale parity, design tokens specific to that codebase, competitive
 benchmarks), also consult the project skill (e.g. `postbuzz_ux_architect`).
+
+---
+
+## Verification Methodology (Run Before Asserting Anything)
+
+A review claim like "state completeness is solid" is **only valid if grep-verified**. Don't
+assert from sampled reading — run the checks. The framework matters because subtle gaps (a
+missing `error.tsx` in one detail route) are invisible to file-by-file reading but obvious to
+a directory scan.
+
+### State completeness parity
+
+Every route directory with a `page.tsx` should have `loading.tsx` AND `error.tsx`. Verify:
+
+```bash
+find <route-root> -type d | while read d; do
+  if [ -f "$d/page.tsx" ]; then
+    has_loading=$(test -f "$d/loading.tsx" && echo 1 || echo 0)
+    has_error=$(test -f "$d/error.tsx" && echo 1 || echo 0)
+    [ "$has_loading$has_error" != "11" ] && echo "GAP: $d loading=$has_loading error=$has_error"
+  fi
+done
+```
+
+Each gap is a `🔴 Critical` finding.
+
+### Anti-pattern grep sweep
+
+Run these greps before claiming the codebase is clean. Missing any of these checks is a review
+gap, not a clean codebase:
+
+```bash
+# Animation anti-patterns (see references/06)
+grep -rn "transition-all\|transition: all" --include="*.tsx"
+grep -rn "scale(0)" --include="*.tsx" | grep -v "scale(0\."
+grep -rn "h-screen" --include="*.tsx"
+
+# Accessibility anti-patterns
+grep -rn "<div[^>]*onClick" --include="*.tsx"
+grep -rn "<img " --include="*.tsx" | grep -v "width="
+grep -rn "outline-none\|outline: none" --include="*.tsx"
+
+# Multi-line JSX caveat: `<button>` type and `<input>` label checks are unreliable
+# via single-line grep — attrs span lines. Use AST tooling or `grep -A3 '<button'`
+# then visually confirm. A clean grep does NOT mean clean code.
+
+# Dark-mode / native-control compliance
+grep -rn "colorScheme\|color-scheme" --include="*.tsx" --include="*.css" app/  # should be set on <html>
+
+# Performance anti-patterns
+grep -rn "z-\[[0-9]\{4,\}\]" --include="*.tsx"
+grep -rn 'bg-\${' --include="*.tsx"
+
+# Layout-primitive bypass (project-specific — adapt per CLAUDE.md)
+grep -rn 'className=.*\\bspace-y-\|className=.*\\bflex items-center gap-' --include="*.tsx"
+```
+
+Count violations per file; cite the top offenders with `file:line`. If a grep returns nothing,
+say so explicitly ("0 instances of `transition-all` found") — silence is ambiguous.
 
 ---
 
@@ -138,14 +199,36 @@ accessibility, hydration, touch, i18n, safe-areas.]
 
 ## Severity Definitions
 
-- **🔴 Critical** — blocks merge. Accessibility failure, security vulnerability, broken core
-  flow, destructive action without confirmation, missing required state (empty/loading/error
-  for a populated view).
-- **🟡 Important** — should fix this PR. Standards violation that the user will feel but won't
-  block them. Hardcoded tokens, missing hover states, suboptimal animation, missing
-  `prefers-reduced-motion`.
-- **🟢 Opportunity** — could enhance. Optical alignment, additional polish, a better creative
-  pattern, performance optimization beyond targets.
+Severity is determined by **user-blocking impact**, not by how strongly the rule feels
+violated. When in doubt, downgrade.
+
+- **🔴 Critical — blocks merge.** Accessibility failure that blocks keyboard or screen-reader
+  users (e.g. `<div onClick>` with no role/tabindex, `outline: none` with no focus-visible
+  replacement, form input missing `<label>`), security vulnerability, broken core flow,
+  destructive action without confirmation, missing required state (`empty/loading/error` for a
+  populated view), missing `loading.tsx` or `error.tsx` for a route with `page.tsx`,
+  hardcoded user-facing strings in a project with i18n configured.
+- **🟡 Important — should fix this PR.** Standards violation the user will feel but won't block
+  them. Hardcoded design tokens, missing hover states, `transition-all` instead of specific
+  properties, suboptimal animation, missing `prefers-reduced-motion` in a motion-heavy
+  component, no explicit `type` on a `<button>` inside a form, `<img>` without explicit
+  `width`/`height`, raw layout Tailwind in a project that has layout primitives.
+- **🟢 Opportunity — could enhance.** Optical alignment, additional polish, a better creative
+  pattern, performance optimization beyond targets, focus-visible style missing **but no
+  `outline-none` present** (browser default ring still works — not blocking).
+
+### Severity calibration: when "missing focus-visible" is what
+
+| Code state                                        | Severity                                                                                   |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `outline: none` with no replacement               | 🔴 Critical (keyboard users have no focus indicator)                                       |
+| `outline-none` with no replacement                | 🔴 Critical (same)                                                                         |
+| No explicit focus-visible, no outline suppression | 🟢 Opportunity (browser default works — should match design system, but not user-blocking) |
+| Has `focus-visible:ring-*` but inconsistent token | 🟡 Important (style drift)                                                                 |
+
+The audit error to avoid: claiming a button is "keyboard inaccessible" when it has no explicit
+focus styles AND no outline suppression. The browser draws a default ring; the user can see
+focus. The fix is consistency, not accessibility.
 
 ---
 

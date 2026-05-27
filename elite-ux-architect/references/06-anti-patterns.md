@@ -210,20 +210,25 @@ What AI forgets — these show up as gaps, not as bugs.
 When the diff includes any of these, reject and ask for the fix. For the full code review
 structure see `10-review-protocol.md`.
 
-| Pattern                            | Find by                                    | Fix                                                  |
-| ---------------------------------- | ------------------------------------------ | ---------------------------------------------------- |
-| `outline: none` (no replacement)   | grep `outline-none\|outline: none`         | Add `focus-visible:ring-2` or equivalent             |
-| `<div onClick>` / `<span onClick>` | grep `<div[^>]*onClick\|<span[^>]*onClick` | Convert to `<button>`                                |
-| `transition: all`                  | grep `transition: all\|transition-all`     | Specify properties                                   |
-| `h-screen` on full layout          | grep `h-screen`                            | `min-h-[100dvh]`                                     |
-| `bg-${...}` dynamic class          | grep `\\$\\{[a-z]+\\}-[0-9]`               | Object map                                           |
-| `z-[\d{4,}]`                       | grep `z-\\[[0-9]{4,}\\]`                   | Z-scale token                                        |
-| Missing `alt`                      | grep `<img[^>]*>` without `alt=`           | Add alt or `aria-hidden`                             |
-| `<input>` without label            | inspect each form                          | `<label htmlFor>` or wrapping label                  |
-| `transform: scale(0)` entry        | grep `scale\\(0\\)`                        | `scale(0.95) opacity:0` (see `07a-emil-craft.md`)    |
-| `ease-in` on UI element            | grep `ease-in[^-]`                         | `ease-out` or custom curve (see `07a-emil-craft.md`) |
-| `user-scalable=no`                 | grep `user-scalable`                       | Remove                                               |
-| Hardcoded English in JSX           | grep for capitalized literal strings       | Wrap in `t()`                                        |
+| Pattern                               | Find by                                                                                                                                                     | Fix                                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `outline: none` (no replacement)      | `grep -rn "outline-none\|outline: none" --include="*.tsx"`                                                                                                  | Add `focus-visible:ring-2` or equivalent                                           |
+| `<div onClick>` / `<span onClick>`    | `grep -rn "<div[^>]*onClick\|<span[^>]*onClick" --include="*.tsx"`                                                                                          | Convert to `<button>`                                                              |
+| `transition: all`                     | `grep -rn "transition: all\|transition-all" --include="*.tsx"`                                                                                              | Specify properties (`transition-[color,transform]`)                                |
+| `h-screen` on full layout             | `grep -rn "h-screen" --include="*.tsx"`                                                                                                                     | `min-h-[100dvh]`                                                                   |
+| `bg-${...}` dynamic class             | `grep -rn 'bg-\${' --include="*.tsx"`                                                                                                                       | Object map                                                                         |
+| `z-[\d{4,}]`                          | `grep -rn 'z-\[[0-9]\{4,\}\]' --include="*.tsx"`                                                                                                            | Z-scale token                                                                      |
+| `<img>` missing `alt`                 | `grep -rn '<img ' --include="*.tsx"` then filter for `alt=`                                                                                                 | Add alt or `aria-hidden="true"`                                                    |
+| `<img>` missing `width`/`height`      | `grep -rn '<img ' --include="*.tsx"` then filter for `width=`                                                                                               | Add explicit dimensions (CLS risk) or use `next/image`                             |
+| `<button>` missing `type` attr        | **Naive grep is unreliable** — JSX attrs span lines. Use AST/jsx-ast tooling, or `grep -A3 '<button'` then visually confirm. Most critical inside `<form>`. | Add `type="button"` explicitly                                                     |
+| `<input>` without label               | Inspect each form (also multi-line JSX — naive grep unreliable)                                                                                             | `<label htmlFor>` or wrapping label                                                |
+| `transform: scale(0)` entry           | `grep -rn "scale(0)" --include="*.tsx"` (exclude `scale(0.`)                                                                                                | `scale(0.95) opacity:0` (see `07a-emil-craft.md`)                                  |
+| `ease-in` on UI element               | `grep -rn "ease-in[^-]" --include="*.tsx"`                                                                                                                  | `ease-out` or custom curve (see `07a-emil-craft.md`)                               |
+| `user-scalable=no`                    | `grep -rn "user-scalable" --include="*.tsx"`                                                                                                                | Remove                                                                             |
+| Hardcoded English in JSX              | inspect for capitalized literal strings in `<p>`, `<h*>`, `<button>` text                                                                                   | Wrap in `t()`                                                                      |
+| ICU plural break (`=== 1 ? '' : 's'`) | `grep -rn "=== 1 ? ''" --include="*.tsx"`                                                                                                                   | Use ICU `{count, plural, ...}` — English plural breaks Arabic/Urdu                 |
+| `space-y-*` on `<ul>` / `<li>`        | `grep -rn '<ul[^>]*space-y-\|<li[^>]*space-y-' --include="*.tsx"`                                                                                           | Structural tests often scope to `<div>` only and miss these. Use `<Stack as='ul'>` |
+| Missing `color-scheme` on `<html>`    | Inspect root layout — should set `style={{ colorScheme: 'light dark' }}` or CSS `color-scheme`                                                              | Without it, native scrollbars/selects/date pickers don't dark-mode                 |
 
 For the deep Vercel-style code compliance pass (typography characters, autocomplete, hydration,
 touch action, Intl, safe areas, etc.) invoke the `/web-design-guidelines` skill alongside this
