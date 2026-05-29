@@ -54,7 +54,30 @@ for skill in "$AGENT_SKILLS_DIR"/*; do
     # Check and create symlinks in the appropriate tools
     all_ok=true
 
-    target_dirs=("$CURSOR_SKILLS_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR")
+    # Tool-specific routing. Most skills are shared into all three tools, but
+    # some only make sense in one tool. The cross-tool "second opinion" skills
+    # are intentionally mirrored: each lives in the OTHER tool's discovery path.
+    #   - "claude": Codex-only BY DESIGN. It teaches Codex how to call Claude
+    #     for a second opinion, so it belongs in ~/.codex/skills, NOT ~/.claude.
+    #     (Its mirror, a "codex" skill for Claude, previously lived here and was
+    #     removed; do not re-add it to all tools.)
+    #   - "codex-purge": Codex-only — purges ~/.codex data.
+    #   - "claude-purge": Claude-only — purges ~/.claude data.
+    #   - Cursor builtins/config skills: Cursor-only.
+    case "$skill_name" in
+        claude|codex-purge)
+            target_dirs=("$CODEX_SKILLS_DIR")
+            ;;
+        claude-purge)
+            target_dirs=("$CLAUDE_SKILLS_DIR")
+            ;;
+        create-rule|update-cursor-settings|update-cli-config)
+            target_dirs=("$CURSOR_SKILLS_DIR")
+            ;;
+        *)
+            target_dirs=("$CURSOR_SKILLS_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR")
+            ;;
+    esac
 
     for tool_dir in "${target_dirs[@]}"; do
         symlink_path="$tool_dir/$skill_name"
