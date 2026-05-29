@@ -54,14 +54,7 @@ for skill in "$AGENT_SKILLS_DIR"/*; do
     # Check and create symlinks in the appropriate tools
     all_ok=true
 
-    case "$skill_name" in
-        codex)
-            target_dirs=("$CLAUDE_SKILLS_DIR")
-            ;;
-        *)
-            target_dirs=("$CURSOR_SKILLS_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR")
-            ;;
-    esac
+    target_dirs=("$CURSOR_SKILLS_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR")
 
     for tool_dir in "${target_dirs[@]}"; do
         symlink_path="$tool_dir/$skill_name"
